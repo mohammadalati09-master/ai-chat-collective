@@ -41,6 +41,8 @@ interface ChatSidebarProps {
   onRenameConversation: (id: string, title: string) => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  isGuest?: boolean;
+  onSignIn?: () => void;
 }
 
 export function ChatSidebar({
@@ -52,6 +54,8 @@ export function ChatSidebar({
   onRenameConversation,
   isCollapsed,
   onToggleCollapse,
+  isGuest = false,
+  onSignIn,
 }: ChatSidebarProps) {
   const { user, signOut } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
