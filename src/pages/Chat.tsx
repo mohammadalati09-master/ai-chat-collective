@@ -3,9 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { AnimatedBackground } from '@/components/chat/AnimatedBackground';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { ChatArea } from '@/components/chat/ChatArea';
+import { BuildMode } from '@/components/build/BuildMode';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversations } from '@/hooks/useConversations';
+import { useGuestMode } from '@/hooks/useGuestMode';
+import { useBuildMode } from '@/hooks/useBuildMode';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Message, Conversation } from '@/hooks/useConversations';
 
 export default function Chat() {
   const { user, loading: authLoading } = useAuth();
@@ -13,25 +17,33 @@ export default function Chat() {
   const isMobile = useIsMobile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
+  // Build mode state
   const {
-    conversations,
-    currentConversation,
-    messages,
-    loading,
-    setLoading,
-    createConversation,
-    selectConversation,
-    updateConversationTitle,
-    deleteConversation,
-    addMessage,
-  } = useConversations();
+    isBuildMode,
+    toggleBuildMode,
+    device,
+    setDevice,
+    buildState,
+    simulateBuild,
+  } = useBuildMode();
 
-  // Redirect to auth if not logged in
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth');
-    }
-  }, [user, authLoading, navigate]);
+  // Authenticated user conversations
+  const authConversations = useConversations();
+  
+  // Guest mode conversations (localStorage)
+  const guestMode = useGuestMode();
+  
+  // Determine if user is a guest
+  const isGuest = !authLoading && !user;
+  
+  // Use appropriate conversation source
+  const [currentGuestConversation, setCurrentGuestConversation] = useState<Conversation | null>(null);
+  const [guestMessages, setGuestMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
+  
+  const conversations = isGuest ? guestMode.conversations : authConversations.conversations;
+  const currentConversation = isGuest ? currentGuestConversation : authConversations.currentConversation;
+  const messages = isGuest ? guestMessages : authConversations.messages;
 
   // Collapse sidebar on mobile by default
   useEffect(() => {
@@ -41,28 +53,105 @@ export default function Chat() {
   }, [isMobile]);
 
   const handleNewChat = async () => {
-    await createConversation();
+    if (isGuest) {
+      const newConv = guestMode.createConversation();
+      setCurrentGuestConversation(newConv);
+      setGuestMessages([]);
+    } else {
+      await authConversations.createConversation();
+    }
+  };
+
+  const handleSelectConversation = async (conversation: Conversation) => {
+    if (isGuest) {
+      setCurrentGuestConversation(conversation);
+      setGuestMessages(guestMode.getMessages(conversation.id));
+    } else {
+      await authConversations.selectConversation(conversation);
+    }
+    if (isMobile) {
+      setSidebarCollapsed(true);
+    }
+  };
+
+  const handleDeleteConversation = async (id: string) => {
+    if (isGuest) {
+      guestMode.deleteConversation(id);
+      if (currentGuestConversation?.id === id) {
+        setCurrentGuestConversation(null);
+        setGuestMessages([]);
+      }
+    } else {
+      await authConversations.deleteConversation(id);
+    }
+  };
+
+  const handleRenameConversation = async (id: string, title: string) => {
+    if (isGuest) {
+      guestMode.updateConversationTitle(id, title);
+      if (currentGuestConversation?.id === id) {
+        setCurrentGuestConversation(prev => prev ? { ...prev, title } : null);
+      }
+    } else {
+      await authConversations.updateConversationTitle(id, title);
+    }
   };
 
   const handleSendMessage = async (content: string) => {
     setLoading(true);
     
-    // Create conversation if none exists
     let conv = currentConversation;
+    
+    // Create conversation if none exists
     if (!conv) {
-      conv = await createConversation();
+      if (isGuest) {
+        conv = guestMode.createConversation();
+        setCurrentGuestConversation(conv);
+      } else {
+        conv = await authConversations.createConversation();
+      }
     }
     
     if (conv) {
       // Add user message
-      await addMessage(content, 'user');
+      if (isGuest) {
+        const userMsg = guestMode.addMessage(conv.id, content, 'user');
+        setGuestMessages(prev => [...prev, userMsg]);
+        
+        // Update title if first message
+        if (guestMessages.length === 0) {
+          const title = content.slice(0, 50) + (content.length > 50 ? '...' : '');
+          guestMode.updateConversationTitle(conv.id, title);
+          setCurrentGuestConversation(prev => prev ? { ...prev, title } : null);
+        }
+      } else {
+        await authConversations.addMessage(content, 'user');
+      }
+      
+      // If in build mode, simulate building
+      if (isBuildMode) {
+        simulateBuild(content);
+      }
       
       // Simulate AI response delay
       setTimeout(async () => {
-        await addMessage('Detta är ett simulerat AI-svar. I en riktig implementation skulle detta vara ett svar från en AI-modell.', 'assistant');
+        const aiResponse = isBuildMode 
+          ? '✅ Jag har byggt din app! Du kan se förhandsvisningen ovan. Vill du göra några ändringar?'
+          : 'Detta är ett simulerat AI-svar. I en riktig implementation skulle detta vara ett svar från en AI-modell.';
+        
+        if (isGuest) {
+          const aiMsg = guestMode.addMessage(conv!.id, aiResponse, 'assistant');
+          setGuestMessages(prev => [...prev, aiMsg]);
+        } else {
+          await authConversations.addMessage(aiResponse, 'assistant');
+        }
         setLoading(false);
-      }, 2000);
+      }, isBuildMode ? 5000 : 2000);
     }
+  };
+
+  const handleSignIn = () => {
+    navigate('/auth');
   };
 
   if (authLoading) {
@@ -77,10 +166,6 @@ export default function Chat() {
     );
   }
 
-  if (!user) {
-    return null;
-  }
-
   return (
     <div className="flex h-screen overflow-hidden">
       <AnimatedBackground />
@@ -91,11 +176,13 @@ export default function Chat() {
           conversations={conversations}
           currentConversation={currentConversation}
           onNewChat={handleNewChat}
-          onSelectConversation={selectConversation}
-          onDeleteConversation={deleteConversation}
-          onRenameConversation={updateConversationTitle}
+          onSelectConversation={handleSelectConversation}
+          onDeleteConversation={handleDeleteConversation}
+          onRenameConversation={handleRenameConversation}
           isCollapsed={sidebarCollapsed && !isMobile}
           onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          isGuest={isGuest}
+          onSignIn={handleSignIn}
         />
       </div>
 
@@ -107,15 +194,30 @@ export default function Chat() {
         />
       )}
 
-      {/* Main chat area */}
-      <ChatArea
-        currentConversation={currentConversation}
-        messages={messages}
-        onSendMessage={handleSendMessage}
-        isLoading={loading}
-        onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
-        isSidebarCollapsed={sidebarCollapsed}
-      />
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col h-screen">
+        {isBuildMode ? (
+          <BuildMode
+            messages={messages}
+            onSendMessage={handleSendMessage}
+            isLoading={loading || buildState.isBuilding}
+            device={device}
+            onDeviceChange={setDevice}
+            buildState={buildState}
+          />
+        ) : (
+          <ChatArea
+            currentConversation={currentConversation}
+            messages={messages}
+            onSendMessage={handleSendMessage}
+            isLoading={loading || authConversations.loading}
+            onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+            isSidebarCollapsed={sidebarCollapsed}
+            isBuildMode={isBuildMode}
+            onToggleBuildMode={toggleBuildMode}
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -1,8 +1,10 @@
 import { useRef, useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Menu } from 'lucide-react';
+import { Menu, Hammer } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { TypingIndicator } from './TypingIndicator';
@@ -68,6 +70,8 @@ interface ChatAreaProps {
   isLoading: boolean;
   onToggleSidebar: () => void;
   isSidebarCollapsed: boolean;
+  isBuildMode?: boolean;
+  onToggleBuildMode?: () => void;
 }
 
 export function ChatArea({
@@ -77,6 +81,8 @@ export function ChatArea({
   isLoading,
   onToggleSidebar,
   isSidebarCollapsed,
+  isBuildMode = false,
+  onToggleBuildMode,
 }: ChatAreaProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedModel, setSelectedModel] = useState('GPT-4');
@@ -135,7 +141,25 @@ export function ChatArea({
             onSelectModel={setSelectedModel}
           />
         </div>
-        <div className="flex items-center gap-2">
+        
+        <div className="flex items-center gap-4">
+          {/* Build Mode Toggle */}
+          {onToggleBuildMode && (
+            <div className="flex items-center gap-2">
+              <Switch
+                id="build-mode"
+                checked={isBuildMode}
+                onCheckedChange={onToggleBuildMode}
+              />
+              <Label 
+                htmlFor="build-mode" 
+                className="flex items-center gap-1.5 cursor-pointer text-sm font-medium"
+              >
+                <Hammer className="h-4 w-4" />
+                <span className="hidden sm:inline">Build</span>
+              </Label>
+            </div>
+          )}
           <ThemeToggle />
         </div>
       </header>
