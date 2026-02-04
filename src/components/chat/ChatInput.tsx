@@ -118,7 +118,7 @@ export function ChatInput({ onSend, disabled, placeholder = "Skriv ett meddeland
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Skriv ett meddelande..."
+              placeholder={placeholder}
               disabled={disabled}
               rows={1}
               className={cn(

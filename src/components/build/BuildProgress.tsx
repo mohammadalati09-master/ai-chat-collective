@@ -21,13 +21,13 @@ export function BuildProgress({ isBuilding, progress, currentStep }: BuildProgre
     >
       <div className="flex items-center gap-3">
         {isComplete ? (
-          <CheckCircle2 className="h-5 w-5 text-green-500" />
+          <CheckCircle2 className="h-5 w-5 text-accent" />
         ) : (
           <Loader2 className="h-5 w-5 animate-spin text-primary" />
         )}
         <span className={cn(
           "text-sm font-medium",
-          isComplete && "text-green-500"
+          isComplete && "text-accent"
         )}>
           {currentStep}
         </span>
@@ -37,7 +37,7 @@ export function BuildProgress({ isBuilding, progress, currentStep }: BuildProgre
         value={progress} 
         className={cn(
           "h-2",
-          isComplete && "[&>div]:bg-green-500"
+          isComplete && "[&>div]:bg-accent"
         )}
       />
       

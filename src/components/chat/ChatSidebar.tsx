@@ -243,52 +243,70 @@ export function ChatSidebar({
 
       {/* Footer with user */}
       <div className="p-3 border-t border-border/50">
-        <div className={cn(
-          "flex items-center gap-2",
-          isCollapsed && "justify-center"
-        )}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-10 w-10 rounded-full p-0">
-                <Avatar className="h-9 w-9">
-                  <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-sm">
-                    {userInitials}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 glass-card">
-              <div className="px-2 py-1.5">
-                <p className="text-sm font-medium">{user?.email}</p>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="gap-2 cursor-pointer">
-                <User className="h-4 w-4" />
-                <span>Profil</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer">
-                <Settings className="h-4 w-4" />
-                <span>Inställningar</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="gap-2 cursor-pointer text-destructive"
-                onClick={signOut}
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Logga ut</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          {!isCollapsed && (
-            <>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user?.email}</p>
-              </div>
-              <ThemeToggle />
-            </>
-          )}
-        </div>
+        {isGuest ? (
+          <div className={cn(
+            "flex items-center gap-2",
+            isCollapsed && "justify-center"
+          )}>
+            <Button
+              onClick={onSignIn}
+              variant="outline"
+              size={isCollapsed ? "icon" : "default"}
+              className={cn("gap-2", isCollapsed && "h-10 w-10")}
+            >
+              <User className="h-4 w-4" />
+              {!isCollapsed && <span>Logga in för att spara</span>}
+            </Button>
+            {!isCollapsed && <ThemeToggle />}
+          </div>
+        ) : (
+          <div className={cn(
+            "flex items-center gap-2",
+            isCollapsed && "justify-center"
+          )}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-10 w-10 rounded-full p-0">
+                  <Avatar className="h-9 w-9">
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-sm">
+                      {userInitials}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 glass-card">
+                <div className="px-2 py-1.5">
+                  <p className="text-sm font-medium">{user?.email}</p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="gap-2 cursor-pointer">
+                  <User className="h-4 w-4" />
+                  <span>Profil</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2 cursor-pointer">
+                  <Settings className="h-4 w-4" />
+                  <span>Inställningar</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="gap-2 cursor-pointer text-destructive"
+                  onClick={signOut}
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Logga ut</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {!isCollapsed && (
+              <>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{user?.email}</p>
+                </div>
+                <ThemeToggle />
+              </>
+            )}
+          </div>
+        )}
       </div>
     </motion.aside>
   );
