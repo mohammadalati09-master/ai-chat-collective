@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 interface ChatInputProps {
   onSend: (message: string) => void;
   disabled?: boolean;
+  placeholder?: string;
 }
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
