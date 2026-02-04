@@ -7,9 +7,10 @@ import { cn } from '@/lib/utils';
 interface ChatInputProps {
   onSend: (message: string) => void;
   disabled?: boolean;
+  placeholder?: string;
 }
 
-export function ChatInput({ onSend, disabled }: ChatInputProps) {
+export function ChatInput({ onSend, disabled, placeholder = "Skriv ett meddelande..." }: ChatInputProps) {
   const [message, setMessage] = useState('');
   const [attachments, setAttachments] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -117,7 +118,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Skriv ett meddelande..."
+              placeholder={placeholder}
               disabled={disabled}
               rows={1}
               className={cn(
