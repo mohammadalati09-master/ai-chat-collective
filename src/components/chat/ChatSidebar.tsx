@@ -284,10 +284,14 @@ export function ChatSidebar({
                   <User className="h-4 w-4" />
                   <span>Profil</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="gap-2 cursor-pointer">
-                  <Settings className="h-4 w-4" />
-                  <span>Inställningar</span>
-                </DropdownMenuItem>
+                <SettingsSheet 
+                  trigger={
+                    <DropdownMenuItem className="gap-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>
+                      <Settings className="h-4 w-4" />
+                      <span>Inställningar</span>
+                    </DropdownMenuItem>
+                  }
+                />
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="gap-2 cursor-pointer text-destructive"
