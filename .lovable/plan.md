@@ -1,161 +1,232 @@
 
-
-# Build Mode - App Generator Interface
+# Multiple Themes + Word-like Editor with AI Assistant
 
 ## Overview
-Add a "Build" mode toggle that transforms the chat interface into an app generation platform similar to Lovable, Replit, Bolt, and Base44. This includes a split-panel layout with a preview iframe and makes authentication optional.
+This plan implements two major features:
+1. **5 Unique Themes** - Add 3 new distinctive themes beyond light/dark, accessible via a Settings panel
+2. **Word-like Editor Section** - A rich text editor that appears for messages, with an AI context menu for text assistance
 
 ---
 
-## Changes Summary
+## Feature 1: Multiple Themes System
 
-### 1. Make Authentication Optional
-Currently, users are forced to login. We'll change this to allow guest usage:
-- Modify `Index.tsx` to redirect to `/chat` directly (not `/auth`)
-- Update `Chat.tsx` to work without authentication
-- Create a guest mode in `useConversations` that stores data locally
-- Add "Sign in" button in sidebar for guests who want to save their chats
+### Theme Definitions
 
-### 2. Add Build Mode Toggle
-Add a toggle switch in the header to enable "Build" mode:
-- Place it next to the model selector in `ChatArea.tsx`
-- Use the existing Switch component with a "Build" label
-- Add a distinctive icon (Hammer/Wrench)
-- Toggle animates smoothly
+| Theme | Description | Color Palette | Animation Style |
+|-------|-------------|---------------|-----------------|
+| **Light** (existing) | Clean, bright default | Purple/pink gradients on white | Gentle floating orbs |
+| **Dark** (existing) | Sleek night mode | Purple/violet on dark gray | Subtle glowing orbs |
+| **Ocean** (new) | Deep sea vibes | Teal, cyan, deep blue | Wave-like flowing animations |
+| **Sunset** (new) | Warm golden hour | Orange, coral, warm pink | Slow pulsing sun-like orbs |
+| **Forest** (new) | Natural, calming | Green, emerald, earth tones | Leaf-like gentle drifting |
 
-### 3. Build Mode Layout (New Component: `BuildMode.tsx`)
-When Build mode is active, the interface transforms:
+### Implementation Details
 
+**1. Update Theme Hook** (`src/hooks/useTheme.tsx`)
+- Expand Theme type: `'light' | 'dark' | 'ocean' | 'sunset' | 'forest'`
+- Update `setTheme` to handle all 5 themes
+- Keep `toggleTheme` for quick light/dark switch
+- Add theme metadata (name, icon, preview colors)
+
+**2. Add CSS Theme Variables** (`src/index.css`)
+- Add `.ocean`, `.sunset`, `.forest` classes with complete variable sets
+- Each theme gets unique:
+  - Primary/secondary/accent colors
+  - Gradient definitions
+  - Glass effect colors
+  - Animation keyframes
+
+**3. Create Settings Sheet Component** (`src/components/settings/SettingsSheet.tsx`)
+- Slide-out panel using existing Sheet component
+- Theme selector section with visual preview cards
+- Click to apply theme with smooth transition
+- Current theme highlighted
+
+**4. Update Animated Background** (`src/components/chat/AnimatedBackground.tsx`)
+- Accept theme prop to adjust orb colors dynamically
+- Different animation patterns per theme
+- Smooth color transitions when switching
+
+**5. Add Settings Button to Sidebar**
+- Replace or enhance the existing Settings dropdown item
+- Opens the Settings Sheet
+
+---
+
+## Feature 2: Word-like Editor Section
+
+### Overview
+When a message is created or clicked, open a full Word-like editing experience with formatting tools and AI assistance.
+
+### Editor Toolbar (inspired by uploaded image)
 ```text
-+------------------+----------------------------------+
-|    Sidebar       |     Preview Panel (iframe)       |
-| (conversations)  |    +------------------------+    |
-|                  |    |  Generated App View    |    |
-|                  |    |                        |    |
-|                  |    |   [Mobile/Tablet/      |    |
-|                  |    |    Desktop toggle]     |    |
-|                  |    +------------------------+    |
-|                  +----------------------------------+
-|                  |          Chat Panel              |
-|                  |  +----------------------------+  |
-|                  |  |  Messages scroll area      |  |
-|                  |  +----------------------------+  |
-|                  |  |  Input: "Build me an app  |  |
-|                  |  |  that does X..."          |  |
-|                  +----------------------------------+
-+------------------+----------------------------------+
++------------------------------------------------------------------+
+| Urklipp | Tecken                          | Stycke               |
+|---------|----------------------------------|----------------------|
+| Klistra | Font  | Size | B I U S | A  A  | Align | Lists | etc  |
++------------------------------------------------------------------+
 ```
 
-Features:
-- Uses `ResizablePanelGroup` for adjustable panels
-- Preview panel on top (60% default height)
-- Chat panel on bottom (40% default height)
-- Horizontal resize between sidebar and main area
-- Vertical resize between preview and chat
+**Toolbar Groups:**
+1. **Clipboard**: Cut, Copy, Paste, Format painter
+2. **Font**: Bold, Italic, Underline, Strikethrough, Subscript, Superscript, Text color, Highlight
+3. **Paragraph**: Alignment (left/center/right/justify), Lists (bullet/numbered), Indent
 
-### 4. Preview Panel Component (`BuildPreview.tsx`)
-The preview area includes:
-- **Device selector** - Mobile/Tablet/Desktop view buttons
-- **URL bar** (visual) - Shows simulated app URL
-- **Refresh button** - Simulates reloading
-- **Open in new tab** button
-- **Iframe container** - Shows a demo/placeholder app
-- Device frame styling (phone/tablet borders)
+### AI Assistant Context Menu
+When text is selected, show a floating menu (inspired by uploaded image 2):
 
-### 5. Build Chat Modifications
-When in Build mode, the chat adapts:
-- Different placeholder text: "Beskriv appen du vill bygga..."
-- Build-specific suggestions in empty state:
-  - "Bygg en todo-app med kategorier"
-  - "Skapa en väder-app med kartor"
-  - "Gör en receptsamling med sökfunktion"
-- AI responses simulate "building" with progress indicators
-- Show simulated file tree/code changes
+```text
++----------------------+
+| Quick Fix            |
+|   Fix                |
+|   Explain            |
+|----------------------|
+| Rewrite              |
+|   Modify             |
+|   Review             |
+|----------------------|
+| More Actions...      |
+|   > Summarize        |
+|   > Translate        |
+|   > Make Shorter     |
+|   > Make Longer      |
+|   > Change Tone      |
++----------------------+
+```
 
-### 6. File Tree Panel (Optional Side Panel)
-Add a collapsible file tree showing "generated" files:
-- `src/App.tsx`
-- `src/components/...`
-- `package.json`
-- Files highlight when "modified"
+### New Components
 
-### 7. Build Progress Component (`BuildProgress.tsx`)
-Shows simulated build progress:
-- "Skapar projektstruktur..."
-- "Installerar beroenden..."
-- "Genererar komponenter..."
-- Progress bar animation
-- Success/error states
+**1. Document Editor Page** (`src/components/editor/DocumentEditor.tsx`)
+- Full-screen or modal editor view
+- Rich text editing area with contentEditable or textarea
+- Formatting toolbar at top
+- Document title editable
+
+**2. Editor Toolbar** (`src/components/editor/EditorToolbar.tsx`)
+- Grouped formatting buttons matching Word style
+- Tooltip on hover for each button
+- Active state for current formatting
+- Uses existing Button, ToggleGroup components
+
+**3. AI Context Menu** (`src/components/editor/AIContextMenu.tsx`)
+- Appears on text selection
+- Floating popover near selection
+- Actions trigger simulated AI responses
+- "More Actions" submenu with 5 planning-relevant options:
+  1. **Summarize** - Condense selected text
+  2. **Translate** - Translate to another language
+  3. **Make Shorter** - Reduce verbosity
+  4. **Make Longer** - Expand with details
+  5. **Change Tone** - Professional/Casual/Friendly
+
+**4. AI Action Result** (`src/components/editor/AIActionResult.tsx`)
+- Shows AI response in a card below selection
+- Accept/Reject buttons
+- Diff view showing changes
+
+### Integration Points
+
+**In ChatMessage Component:**
+- Add "Edit in Document" button on hover
+- Opens DocumentEditor with message content
+
+**In ChatArea/BuildMode:**
+- Add "New Document" button in header
+- Opens blank DocumentEditor
+
+**State Management:**
+- Create `useDocumentEditor` hook for editor state
+- Track open documents
+- Sync with messages/conversations
 
 ---
 
-## Technical Details
+## Technical Implementation
 
-### New Files to Create
-1. `src/components/build/BuildMode.tsx` - Main build mode layout
-2. `src/components/build/BuildPreview.tsx` - Preview iframe component
-3. `src/components/build/DeviceSelector.tsx` - Mobile/tablet/desktop toggle
-4. `src/components/build/FileTree.tsx` - Simulated file explorer
-5. `src/components/build/BuildProgress.tsx` - Progress indicator
-6. `src/components/build/BuildEmptyState.tsx` - Build-specific suggestions
-7. `src/hooks/useBuildMode.tsx` - State management for build mode
-8. `src/hooks/useGuestMode.tsx` - Local storage for guest users
+### Files to Create
+```text
+src/components/settings/
+  SettingsSheet.tsx        - Main settings panel
+  ThemeSelector.tsx        - Visual theme picker
+
+src/components/editor/
+  DocumentEditor.tsx       - Full editor view
+  EditorToolbar.tsx        - Formatting toolbar
+  ToolbarButton.tsx        - Individual toolbar button
+  AIContextMenu.tsx        - Selection AI menu
+  AIActionResult.tsx       - AI response display
+
+src/hooks/
+  useDocumentEditor.tsx    - Editor state management
+```
 
 ### Files to Modify
-1. `src/pages/Index.tsx` - Remove forced auth redirect
-2. `src/pages/Chat.tsx` - Add build mode toggle and conditional rendering
-3. `src/components/chat/ChatArea.tsx` - Add build mode prop and toggle
-4. `src/components/chat/ChatSidebar.tsx` - Handle guest mode
-5. `src/components/chat/ChatInput.tsx` - Build mode placeholder
-6. `src/components/chat/EmptyState.tsx` - Add build suggestions
-7. `src/hooks/useConversations.tsx` - Add guest mode support
-8. `src/hooks/useAuth.tsx` - Add guest user support
+```text
+src/hooks/useTheme.tsx     - Expand to 5 themes
+src/index.css              - Add 3 new theme CSS
+src/components/chat/ChatSidebar.tsx   - Add settings trigger
+src/components/chat/ChatMessage.tsx   - Add "Edit" button
+src/components/chat/AnimatedBackground.tsx - Theme-aware animations
+```
 
-### Database Considerations
-- No database changes needed
-- Guest mode uses localStorage
-- When guest signs up, migrate local data to database
+### New Dependencies
+No new dependencies needed - uses existing:
+- Radix UI for popover/dropdown
+- Lucide for icons
+- Framer Motion for animations
 
 ---
 
 ## User Experience Flow
 
-### Guest User Flow
-1. User arrives at `/` -> redirected to `/chat` (not `/auth`)
-2. Can use chat normally with data stored locally
-3. Sees "Logga in för att spara" prompt in sidebar
-4. Can click to sign in/up when ready
-5. After login, local data migrates to database
+### Theme Switching
+1. User clicks Settings in sidebar footer
+2. Settings sheet slides in from right
+3. "Themes" section shows 5 visual cards
+4. User clicks theme card
+5. Theme applies instantly with smooth transition
+6. Background orbs change color/animation
 
-### Build Mode Flow
-1. User clicks "Build" toggle in header
-2. Interface smoothly transitions to split layout
-3. User types: "Bygg en app som..."
-4. Simulated build progress appears
-5. Preview shows placeholder/demo content
-6. File tree shows "generated" files
-7. User can continue chatting to refine
+### Document Editing
+1. User hovers on a message -> sees "Edit" button
+2. Click opens DocumentEditor with message content
+3. User can format text using toolbar
+4. Select text -> AI menu appears
+5. Choose AI action (e.g., "Fix")
+6. AI suggestion appears below selection
+7. Accept or reject changes
+8. Save returns to chat with updated message
 
 ---
 
-## Design Notes
+## CSS Theme Previews
 
-### Build Mode Styling
-- Preview panel has subtle glassmorphism border
-- Device frames use rounded corners and shadows
-- Progress indicators use gradient animations
-- File tree icons match VS Code style
-- Build toggle has "under construction" feel
+### Ocean Theme
+- Primary: `185 75% 45%` (Teal)
+- Accent: `200 90% 55%` (Cyan)
+- Background: Deep navy gradients
+- Orbs: Aqua/blue wave animations
 
-### Animations
-- Smooth transition when toggling build mode
-- Panel resize animations
-- Progress bar fills smoothly
-- Preview device transitions
-- File tree expand/collapse
+### Sunset Theme
+- Primary: `25 95% 55%` (Orange)
+- Accent: `340 85% 60%` (Coral pink)
+- Background: Warm amber/rose gradients
+- Orbs: Golden pulsing like setting sun
 
-### Responsive Behavior
-- Mobile: Stack preview above chat (no side-by-side)
-- Tablet: Narrower sidebar, full preview/chat
-- Desktop: Full three-panel layout
+### Forest Theme
+- Primary: `142 70% 40%` (Forest green)
+- Accent: `95 60% 45%` (Lime)
+- Background: Earth tone gradients
+- Orbs: Green leaf-like floating
 
+---
+
+## Animation Differences by Theme
+
+| Theme | Orb Speed | Orb Movement | Glow Color |
+|-------|-----------|--------------|------------|
+| Light | Medium | Smooth float | Purple |
+| Dark | Slow | Gentle pulse | Violet |
+| Ocean | Fast | Wave-like | Cyan |
+| Sunset | Slow | Expanding pulse | Orange |
+| Forest | Medium | Drift/fall | Green |
