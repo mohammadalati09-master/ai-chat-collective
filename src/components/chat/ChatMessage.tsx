@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Copy, Check, ThumbsUp, ThumbsDown, Share2, User } from 'lucide-react';
+import { Copy, Check, ThumbsUp, ThumbsDown, Share2, User, FileEdit } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { CodeBlock } from './CodeBlock';
+import { useDocumentEditor } from '@/hooks/useDocumentEditor';
 import { cn } from '@/lib/utils';
 
 interface ChatMessageProps {
@@ -16,6 +17,7 @@ interface ChatMessageProps {
 }
 
 export function ChatMessage({ role, content, createdAt, isStreaming }: ChatMessageProps) {
+  const { openEditor } = useDocumentEditor();
   const [displayContent, setDisplayContent] = useState(isStreaming ? '' : content);
   const [copied, setCopied] = useState(false);
   const [reaction, setReaction] = useState<'up' | 'down' | null>(null);
@@ -158,6 +160,14 @@ export function ChatMessage({ role, content, createdAt, isStreaming }: ChatMessa
               >
                 <Share2 className="h-3 w-3" />
               </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => openEditor(content, 'Redigera meddelande')}
+                >
+                  <FileEdit className="h-3 w-3" />
+                </Button>
             </div>
           )}
         </div>
