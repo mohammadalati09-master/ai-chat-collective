@@ -30,6 +30,7 @@ import {
 import { ThemeToggle } from './ThemeToggle';
 import { Conversation } from '@/hooks/useConversations';
 import { useAuth } from '@/hooks/useAuth';
+import { SettingsSheet } from '@/components/settings/SettingsSheet';
 import { cn } from '@/lib/utils';
 
 interface ChatSidebarProps {
