@@ -1,232 +1,116 @@
 
-# Multiple Themes + Word-like Editor with AI Assistant
 
-## Overview
-This plan implements two major features:
-1. **5 Unique Themes** - Add 3 new distinctive themes beyond light/dark, accessible via a Settings panel
-2. **Word-like Editor Section** - A rich text editor that appears for messages, with an AI context menu for text assistance
+# Temaförbättringar + 20 nya features
 
----
+## Del 1: Förbättrade teman - Klassiska och ögonvänliga
 
-## Feature 1: Multiple Themes System
+### Problem med nuvarande teman
+De nuvarande temana har några problem som kan orsaka ögontrötthet:
+- **Ljust tema**: Bakgrunden är för vit/ljus, primärfärgerna är för mättade
+- **Mörkt tema**: Kontrasten är för hög, bakgrunden är för mörk
+- **Ocean tema**: Teal-färgerna är för intensiva
+- **Sunset tema**: Orange/korall är för starkt för längre läsning
+- **Forest tema**: Gröna toner kan vara tröttande
 
-### Theme Definitions
+### Lösning: Klassiska, dämpade färgpaletter
 
-| Theme | Description | Color Palette | Animation Style |
-|-------|-------------|---------------|-----------------|
-| **Light** (existing) | Clean, bright default | Purple/pink gradients on white | Gentle floating orbs |
-| **Dark** (existing) | Sleek night mode | Purple/violet on dark gray | Subtle glowing orbs |
-| **Ocean** (new) | Deep sea vibes | Teal, cyan, deep blue | Wave-like flowing animations |
-| **Sunset** (new) | Warm golden hour | Orange, coral, warm pink | Slow pulsing sun-like orbs |
-| **Forest** (new) | Natural, calming | Green, emerald, earth tones | Leaf-like gentle drifting |
+| Tema | Förbättringar |
+|------|---------------|
+| **Light** | Varmare off-white bakgrund (240 20% 98%), mjukare grå för text, pastellprimärfärger |
+| **Dark** | Mjukare mörkgrå (inte svart), lägre kontrasttext (85% istället för 95%), dämpade accenter |
+| **Ocean** | Mjukare havsblå toner, varmare grönblå, lägre mättnad på primärfärger |
+| **Sunset** | Varmare bärnsten istället för neon-orange, mjuka terrakotta-toner |
+| **Forest** | Varmare skoggrönt, jordiga toner, mjuka mossfärger |
 
-### Implementation Details
+### Tekniska ändringar i `src/index.css`
 
-**1. Update Theme Hook** (`src/hooks/useTheme.tsx`)
-- Expand Theme type: `'light' | 'dark' | 'ocean' | 'sunset' | 'forest'`
-- Update `setTheme` to handle all 5 themes
-- Keep `toggleTheme` for quick light/dark switch
-- Add theme metadata (name, icon, preview colors)
-
-**2. Add CSS Theme Variables** (`src/index.css`)
-- Add `.ocean`, `.sunset`, `.forest` classes with complete variable sets
-- Each theme gets unique:
-  - Primary/secondary/accent colors
-  - Gradient definitions
-  - Glass effect colors
-  - Animation keyframes
-
-**3. Create Settings Sheet Component** (`src/components/settings/SettingsSheet.tsx`)
-- Slide-out panel using existing Sheet component
-- Theme selector section with visual preview cards
-- Click to apply theme with smooth transition
-- Current theme highlighted
-
-**4. Update Animated Background** (`src/components/chat/AnimatedBackground.tsx`)
-- Accept theme prop to adjust orb colors dynamically
-- Different animation patterns per theme
-- Smooth color transitions when switching
-
-**5. Add Settings Button to Sidebar**
-- Replace or enhance the existing Settings dropdown item
-- Opens the Settings Sheet
-
----
-
-## Feature 2: Word-like Editor Section
-
-### Overview
-When a message is created or clicked, open a full Word-like editing experience with formatting tools and AI assistance.
-
-### Editor Toolbar (inspired by uploaded image)
-```text
-+------------------------------------------------------------------+
-| Urklipp | Tecken                          | Stycke               |
-|---------|----------------------------------|----------------------|
-| Klistra | Font  | Size | B I U S | A  A  | Align | Lists | etc  |
-+------------------------------------------------------------------+
+**Light tema (förbättrat):**
+```css
+--background: 40 20% 98%;        /* Varm off-white */
+--foreground: 220 15% 20%;       /* Mjuk mörkgrå */
+--primary: 250 45% 55%;          /* Dämpat violett */
+--muted-foreground: 220 10% 50%; /* Lättläst grå */
 ```
 
-**Toolbar Groups:**
-1. **Clipboard**: Cut, Copy, Paste, Format painter
-2. **Font**: Bold, Italic, Underline, Strikethrough, Subscript, Superscript, Text color, Highlight
-3. **Paragraph**: Alignment (left/center/right/justify), Lists (bullet/numbered), Indent
-
-### AI Assistant Context Menu
-When text is selected, show a floating menu (inspired by uploaded image 2):
-
-```text
-+----------------------+
-| Quick Fix            |
-|   Fix                |
-|   Explain            |
-|----------------------|
-| Rewrite              |
-|   Modify             |
-|   Review             |
-|----------------------|
-| More Actions...      |
-|   > Summarize        |
-|   > Translate        |
-|   > Make Shorter     |
-|   > Make Longer      |
-|   > Change Tone      |
-+----------------------+
+**Dark tema (förbättrat):**
+```css
+--background: 220 20% 12%;       /* Mjuk mörkblå-grå */
+--foreground: 220 15% 85%;       /* Inte helt vit */
+--primary: 250 55% 65%;          /* Mjukt violett */
 ```
 
-### New Components
-
-**1. Document Editor Page** (`src/components/editor/DocumentEditor.tsx`)
-- Full-screen or modal editor view
-- Rich text editing area with contentEditable or textarea
-- Formatting toolbar at top
-- Document title editable
-
-**2. Editor Toolbar** (`src/components/editor/EditorToolbar.tsx`)
-- Grouped formatting buttons matching Word style
-- Tooltip on hover for each button
-- Active state for current formatting
-- Uses existing Button, ToggleGroup components
-
-**3. AI Context Menu** (`src/components/editor/AIContextMenu.tsx`)
-- Appears on text selection
-- Floating popover near selection
-- Actions trigger simulated AI responses
-- "More Actions" submenu with 5 planning-relevant options:
-  1. **Summarize** - Condense selected text
-  2. **Translate** - Translate to another language
-  3. **Make Shorter** - Reduce verbosity
-  4. **Make Longer** - Expand with details
-  5. **Change Tone** - Professional/Casual/Friendly
-
-**4. AI Action Result** (`src/components/editor/AIActionResult.tsx`)
-- Shows AI response in a card below selection
-- Accept/Reject buttons
-- Diff view showing changes
-
-### Integration Points
-
-**In ChatMessage Component:**
-- Add "Edit in Document" button on hover
-- Opens DocumentEditor with message content
-
-**In ChatArea/BuildMode:**
-- Add "New Document" button in header
-- Opens blank DocumentEditor
-
-**State Management:**
-- Create `useDocumentEditor` hook for editor state
-- Track open documents
-- Sync with messages/conversations
-
----
-
-## Technical Implementation
-
-### Files to Create
-```text
-src/components/settings/
-  SettingsSheet.tsx        - Main settings panel
-  ThemeSelector.tsx        - Visual theme picker
-
-src/components/editor/
-  DocumentEditor.tsx       - Full editor view
-  EditorToolbar.tsx        - Formatting toolbar
-  ToolbarButton.tsx        - Individual toolbar button
-  AIContextMenu.tsx        - Selection AI menu
-  AIActionResult.tsx       - AI response display
-
-src/hooks/
-  useDocumentEditor.tsx    - Editor state management
+**Ocean tema (förbättrat):**
+```css
+--background: 200 25% 14%;       /* Djup men varm havsblå */
+--primary: 185 50% 50%;          /* Mjukare teal */
+--accent: 195 60% 55%;           /* Dämpat cyan */
 ```
 
-### Files to Modify
-```text
-src/hooks/useTheme.tsx     - Expand to 5 themes
-src/index.css              - Add 3 new theme CSS
-src/components/chat/ChatSidebar.tsx   - Add settings trigger
-src/components/chat/ChatMessage.tsx   - Add "Edit" button
-src/components/chat/AnimatedBackground.tsx - Theme-aware animations
+**Sunset tema (förbättrat):**
+```css
+--background: 25 20% 12%;        /* Varm brun-grå */
+--primary: 30 65% 50%;           /* Mjuk bärnsten */
+--accent: 15 55% 55%;            /* Varm terrakotta */
 ```
 
-### New Dependencies
-No new dependencies needed - uses existing:
-- Radix UI for popover/dropdown
-- Lucide for icons
-- Framer Motion for animations
+**Forest tema (förbättrat):**
+```css
+--background: 120 15% 12%;       /* Varm skogsgrå */
+--primary: 140 40% 45%;          /* Mjuk mossa */
+--accent: 90 35% 50%;            /* Varm limegrön */
+```
+
+### Uppdateringar i `useTheme.tsx`
+- Uppdatera förhandsvisningsfärger för varje tema
+- Förbättra beskrivningar
 
 ---
 
-## User Experience Flow
+## Del 2: 20 nya små features
 
-### Theme Switching
-1. User clicks Settings in sidebar footer
-2. Settings sheet slides in from right
-3. "Themes" section shows 5 visual cards
-4. User clicks theme card
-5. Theme applies instantly with smooth transition
-6. Background orbs change color/animation
+Baserat på appens nuvarande funktionalitet, här är 20 små features som förbättrar användarupplevelsen:
 
-### Document Editing
-1. User hovers on a message -> sees "Edit" button
-2. Click opens DocumentEditor with message content
-3. User can format text using toolbar
-4. Select text -> AI menu appears
-5. Choose AI action (e.g., "Fix")
-6. AI suggestion appears below selection
-7. Accept or reject changes
-8. Save returns to chat with updated message
+### Kategori: Chat-förbättringar (1-5)
+| # | Feature | Beskrivning |
+| 4 | **Redigera användarmeddelanden** | Möjlighet att redigera skickade meddelanden |
+| 5 | **Meddelandesökning** | Sök efter text inom aktuell konversation |
+
+### Kategori: Inputförbättringar (6-10)
+| # | Feature | Beskrivning |
+|---|---------|-------------|
+| 6 | **Promptmallar** | Snabbval för vanliga prompttyper ("Förklara...", "Skriv kod för...") |
+| 7 | **Senaste meddelanden** | Pil upp för att hämta tidigare skickade meddelanden |
+| 9 | **Röstinmatning (visuell)** | Animerad mikrofon-ikon med nivåmätare |
+| 10 | **Markdown-förhandsvisning** | Visa hur markdown renderas innan man skickar |
+
+### Kategori: Editor-förbättringar (16-18)
+| # | Feature | Beskrivning |
+|---|---------|-------------|
+| 18 | **Automatisk sparning** | Spara dokument automatiskt var 30:e sekund |
+
+### Kategori: UI/UX-polish (19-20)
+| # | Feature | Beskrivning |
+|---|---------|-------------|
+| 19 | **Laddningsskelett** | Visa skelett-UI istället för spinner vid laddning |
+---
+
+## Implementationsplan
+
+### Fil-ändringar för temaförbättringar:
+1. **`src/index.css`** - Uppdatera alla 5 teman med nya CSS-variabler
+2. **`src/hooks/useTheme.tsx`** - Uppdatera förhandsvisningsfärger
+
+### Nya filer för features:
+Ingen implementation nu - detta är en översikt för framtida utveckling.
 
 ---
 
-## CSS Theme Previews
+## Sammanfattning
 
-### Ocean Theme
-- Primary: `185 75% 45%` (Teal)
-- Accent: `200 90% 55%` (Cyan)
-- Background: Deep navy gradients
-- Orbs: Aqua/blue wave animations
+**Temaförbättringar:**
+- Alla 5 teman får mjukare, mer ögonvänliga färger
+- Lägre kontrast för bekvämare läsning
+- Varmare toner istället för kalla/intensiva
 
-### Sunset Theme
-- Primary: `25 95% 55%` (Orange)
-- Accent: `340 85% 60%` (Coral pink)
-- Background: Warm amber/rose gradients
-- Orbs: Golden pulsing like setting sun
 
-### Forest Theme
-- Primary: `142 70% 40%` (Forest green)
-- Accent: `95 60% 45%` (Lime)
-- Background: Earth tone gradients
-- Orbs: Green leaf-like floating
 
----
-
-## Animation Differences by Theme
-
-| Theme | Orb Speed | Orb Movement | Glow Color |
-|-------|-----------|--------------|------------|
-| Light | Medium | Smooth float | Purple |
-| Dark | Slow | Gentle pulse | Violet |
-| Ocean | Fast | Wave-like | Cyan |
-| Sunset | Slow | Expanding pulse | Orange |
-| Forest | Medium | Drift/fall | Green |
