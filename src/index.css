@@ -6,59 +6,59 @@
 
 @layer base {
   :root {
-    /* Core colors */
-    --background: 240 20% 97%;
-    --foreground: 240 10% 10%;
+    /* Core colors - Warm off-white for comfortable reading */
+    --background: 40 20% 98%;
+    --foreground: 220 15% 20%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 10%;
+    --card: 40 15% 99%;
+    --card-foreground: 220 15% 20%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 10%;
+    --popover: 40 15% 99%;
+    --popover-foreground: 220 15% 20%;
 
-    /* Primary - Electric violet */
-    --primary: 262 83% 58%;
+    /* Primary - Soft muted violet */
+    --primary: 250 45% 55%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Soft lavender */
-    --secondary: 250 50% 95%;
-    --secondary-foreground: 262 83% 45%;
+    /* Secondary - Gentle lavender */
+    --secondary: 250 30% 94%;
+    --secondary-foreground: 250 45% 40%;
 
-    --muted: 240 15% 92%;
-    --muted-foreground: 240 10% 45%;
+    --muted: 220 15% 92%;
+    --muted-foreground: 220 10% 50%;
 
-    /* Accent - Coral pink */
-    --accent: 340 82% 65%;
+    /* Accent - Soft rose */
+    --accent: 340 50% 60%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 15% 88%;
-    --input: 240 15% 88%;
-    --ring: 262 83% 58%;
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 250 45% 55%;
 
     --radius: 1rem;
 
     /* Glassmorphism specific */
-    --glass: 0 0% 100% / 0.7;
-    --glass-border: 0 0% 100% / 0.3;
-    --glass-shadow: 262 83% 30% / 0.1;
+    --glass: 40 15% 99% / 0.7;
+    --glass-border: 220 15% 90% / 0.3;
+    --glass-shadow: 250 45% 40% / 0.08;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(340 82% 65%));
-    --gradient-secondary: linear-gradient(135deg, hsl(200 80% 60%), hsl(262 83% 58%));
-    --gradient-background: linear-gradient(135deg, hsl(250 50% 97%), hsl(340 50% 97%), hsl(200 50% 97%));
+    /* Gradients - Softer, warmer */
+    --gradient-primary: linear-gradient(135deg, hsl(250 45% 55%), hsl(340 50% 60%));
+    --gradient-secondary: linear-gradient(135deg, hsl(200 50% 55%), hsl(250 45% 55%));
+    --gradient-background: linear-gradient(135deg, hsl(40 20% 98%), hsl(340 30% 97%), hsl(250 25% 97%));
 
     /* Sidebar */
-    --sidebar-background: 0 0% 100% / 0.5;
-    --sidebar-foreground: 240 10% 20%;
-    --sidebar-primary: 262 83% 58%;
+    --sidebar-background: 40 15% 99% / 0.5;
+    --sidebar-foreground: 220 15% 25%;
+    --sidebar-primary: 250 45% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 262 50% 95%;
-    --sidebar-accent-foreground: 262 83% 45%;
-    --sidebar-border: 240 15% 88%;
-    --sidebar-ring: 262 83% 58%;
+    --sidebar-accent: 250 30% 94%;
+    --sidebar-accent-foreground: 250 45% 40%;
+    --sidebar-border: 220 15% 88%;
+    --sidebar-ring: 250 45% 55%;
   }
 
   .dark {
