@@ -111,50 +111,52 @@
   }
 
   .ocean {
-    --background: 200 50% 10%;
-    --foreground: 185 20% 95%;
+    /* Deeper, warmer ocean tones - less eye strain */
+    --background: 200 25% 14%;
+    --foreground: 190 15% 88%;
 
-    --card: 200 40% 14%;
-    --card-foreground: 185 20% 95%;
+    --card: 200 22% 17%;
+    --card-foreground: 190 15% 88%;
 
-    --popover: 200 40% 14%;
-    --popover-foreground: 185 20% 95%;
+    --popover: 200 22% 17%;
+    --popover-foreground: 190 15% 88%;
 
-    --primary: 185 75% 45%;
+    /* Softer teal primary */
+    --primary: 185 50% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 200 40% 18%;
-    --secondary-foreground: 185 75% 70%;
+    --secondary: 200 25% 20%;
+    --secondary-foreground: 185 45% 70%;
 
-    --muted: 200 30% 18%;
-    --muted-foreground: 185 20% 60%;
+    --muted: 200 20% 20%;
+    --muted-foreground: 190 12% 55%;
 
-    --accent: 200 90% 55%;
+    --accent: 195 60% 55%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 55% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 200 30% 22%;
-    --input: 200 30% 22%;
-    --ring: 185 75% 45%;
+    --border: 200 22% 24%;
+    --input: 200 22% 24%;
+    --ring: 185 50% 50%;
 
-    --glass: 200 40% 14% / 0.8;
-    --glass-border: 185 50% 30% / 0.5;
-    --glass-shadow: 185 75% 40% / 0.15;
+    --glass: 200 22% 17% / 0.8;
+    --glass-border: 185 35% 32% / 0.5;
+    --glass-shadow: 185 50% 40% / 0.12;
 
-    --gradient-primary: linear-gradient(135deg, hsl(185 75% 45%), hsl(200 90% 55%));
-    --gradient-secondary: linear-gradient(135deg, hsl(170 70% 40%), hsl(185 75% 45%));
-    --gradient-background: linear-gradient(135deg, hsl(200 50% 8%), hsl(185 40% 12%), hsl(210 50% 10%));
+    --gradient-primary: linear-gradient(135deg, hsl(185 50% 50%), hsl(195 60% 55%));
+    --gradient-secondary: linear-gradient(135deg, hsl(170 45% 42%), hsl(185 50% 50%));
+    --gradient-background: linear-gradient(135deg, hsl(200 25% 12%), hsl(190 22% 15%), hsl(205 25% 13%));
 
-    --sidebar-background: 200 40% 12% / 0.8;
-    --sidebar-foreground: 185 20% 90%;
-    --sidebar-primary: 185 75% 45%;
+    --sidebar-background: 200 22% 15% / 0.8;
+    --sidebar-foreground: 190 12% 85%;
+    --sidebar-primary: 185 50% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 185 40% 22%;
-    --sidebar-accent-foreground: 185 75% 70%;
-    --sidebar-border: 200 30% 22%;
-    --sidebar-ring: 185 75% 45%;
+    --sidebar-accent: 185 30% 24%;
+    --sidebar-accent-foreground: 185 45% 70%;
+    --sidebar-border: 200 22% 24%;
+    --sidebar-ring: 185 50% 50%;
   }
 
   .sunset {
