@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Copy, Check, ThumbsUp, ThumbsDown, Share2, User, FileEdit } from 'lucide-react';
+import { Copy, Check, ThumbsUp, ThumbsDown, Share2, User, FileEdit, Pencil, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { CodeBlock } from './CodeBlock';
 import { useDocumentEditor } from '@/hooks/useDocumentEditor';
 import { cn } from '@/lib/utils';
@@ -14,13 +15,24 @@ interface ChatMessageProps {
   content: string;
   createdAt: string;
   isStreaming?: boolean;
+  onEdit?: (newContent: string) => void;
+  highlightSearch?: string;
 }
 
-export function ChatMessage({ role, content, createdAt, isStreaming }: ChatMessageProps) {
+export function ChatMessage({ 
+  role, 
+  content, 
+  createdAt, 
+  isStreaming,
+  onEdit,
+  highlightSearch 
+}: ChatMessageProps) {
   const { openEditor } = useDocumentEditor();
   const [displayContent, setDisplayContent] = useState(isStreaming ? '' : content);
   const [copied, setCopied] = useState(false);
   const [reaction, setReaction] = useState<'up' | 'down' | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(content);
   const isUser = role === 'user';
 
   // Typing effect for streaming
@@ -49,6 +61,29 @@ export function ChatMessage({ role, content, createdAt, isStreaming }: ChatMessa
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleSaveEdit = () => {
+    if (editContent.trim() && onEdit) {
+      onEdit(editContent.trim());
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditContent(content);
+    setIsEditing(false);
+  };
+
+  // Highlight search terms
+  const getHighlightedContent = (text: string) => {
+    if (!highlightSearch) return text;
+    const parts = text.split(new RegExp(`(${highlightSearch})`, 'gi'));
+    return parts.map((part, i) => 
+      part.toLowerCase() === highlightSearch?.toLowerCase() 
+        ? `**${part}**` 
+        : part
+    ).join('');
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -56,7 +91,8 @@ export function ChatMessage({ role, content, createdAt, isStreaming }: ChatMessa
       transition={{ duration: 0.3 }}
       className={cn(
         "flex gap-3 px-4 py-4 group",
-        isUser ? "flex-row-reverse" : ""
+        isUser ? "flex-row-reverse" : "",
+        highlightSearch && content.toLowerCase().includes(highlightSearch.toLowerCase()) && "bg-primary/5"
       )}
     >
       {/* Avatar */}
@@ -85,7 +121,26 @@ export function ChatMessage({ role, content, createdAt, isStreaming }: ChatMessa
               : "glass-card rounded-bl-md"
           )}
         >
-          {isUser ? (
+          {isEditing ? (
+            <div className="space-y-2 min-w-[200px]">
+              <Textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="min-h-[80px] bg-background/50"
+                autoFocus
+              />
+              <div className="flex gap-2 justify-end">
+                <Button size="sm" variant="ghost" onClick={handleCancelEdit}>
+                  <X className="h-3 w-3 mr-1" />
+                  Avbryt
+                </Button>
+                <Button size="sm" onClick={handleSaveEdit}>
+                  <Check className="h-3 w-3 mr-1" />
+                  Spara
+                </Button>
+              </div>
+            </div>
+          ) : isUser ? (
             <p className="whitespace-pre-wrap">{content}</p>
           ) : (
             <div className="prose prose-sm dark:prose-invert max-w-none">
@@ -110,7 +165,7 @@ export function ChatMessage({ role, content, createdAt, isStreaming }: ChatMessa
                   },
                 }}
               >
-                {displayContent}
+                {highlightSearch ? getHighlightedContent(displayContent) : displayContent}
               </ReactMarkdown>
             </div>
           )}
@@ -122,8 +177,22 @@ export function ChatMessage({ role, content, createdAt, isStreaming }: ChatMessa
             {format(new Date(createdAt), 'HH:mm', { locale: sv })}
           </span>
 
+          {/* Edit button for user messages */}
+          {isUser && !isEditing && onEdit && (
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => setIsEditing(true)}
+              >
+                <Pencil className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+
           {/* Actions for AI messages */}
-          {!isUser && (
+          {!isUser && !isEditing && (
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <Button
                 variant="ghost"
@@ -160,14 +229,14 @@ export function ChatMessage({ role, content, createdAt, isStreaming }: ChatMessa
               >
                 <Share2 className="h-3 w-3" />
               </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  onClick={() => openEditor(content, 'Redigera meddelande')}
-                >
-                  <FileEdit className="h-3 w-3" />
-                </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => openEditor(content, 'Redigera meddelande')}
+              >
+                <FileEdit className="h-3 w-3" />
+              </Button>
             </div>
           )}
         </div>

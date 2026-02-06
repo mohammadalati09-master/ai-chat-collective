@@ -1,6 +1,6 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Menu, Hammer } from 'lucide-react';
+import { Menu, Hammer, Search } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -11,6 +11,7 @@ import { TypingIndicator } from './TypingIndicator';
 import { ModelSelector } from './ModelSelector';
 import { EmptyState } from './EmptyState';
 import { ThemeToggle } from './ThemeToggle';
+import { MessageSearch } from './MessageSearch';
 import { Message, Conversation } from '@/hooks/useConversations';
 
 // Simulated AI responses
@@ -67,6 +68,7 @@ interface ChatAreaProps {
   currentConversation: Conversation | null;
   messages: Message[];
   onSendMessage: (content: string) => Promise<void>;
+  onEditMessage?: (messageId: string, newContent: string) => void;
   isLoading: boolean;
   onToggleSidebar: () => void;
   isSidebarCollapsed: boolean;
@@ -78,6 +80,7 @@ export function ChatArea({
   currentConversation,
   messages,
   onSendMessage,
+  onEditMessage,
   isLoading,
   onToggleSidebar,
   isSidebarCollapsed,
@@ -87,6 +90,8 @@ export function ChatArea({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedModel, setSelectedModel] = useState('GPT-4');
   const [streamingMessage, setStreamingMessage] = useState<Message | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -94,6 +99,19 @@ export function ChatArea({
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, streamingMessage]);
+
+  // Keyboard shortcut for search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleSend = async (content: string) => {
     await onSendMessage(content);
@@ -121,10 +139,21 @@ export function ChatArea({
     handleSend(text);
   };
 
+  const handleNavigateToResult = useCallback((messageId: string) => {
+    const element = document.getElementById(`message-${messageId}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, []);
+
+  const handleEditMessage = useCallback((messageId: string) => (newContent: string) => {
+    onEditMessage?.(messageId, newContent);
+  }, [onEditMessage]);
+
   return (
-    <div className="flex-1 flex flex-col h-screen">
+    <div className="flex-1 flex flex-col h-screen relative">
       {/* Header */}
-      <header className="glass-card rounded-none border-b border-border/50 px-4 py-3 flex items-center justify-between">
+      <header className="glass-card rounded-none border-b border-border/50 px-4 py-3 flex items-center justify-between relative">
         <div className="flex items-center gap-3">
           {isSidebarCollapsed && (
             <Button
@@ -142,7 +171,20 @@ export function ChatArea({
           />
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          {/* Search button */}
+          {messages.length > 0 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              title="Sök (Ctrl+F)"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          )}
+          
           {/* Build Mode Toggle */}
           {onToggleBuildMode && (
             <div className="flex items-center gap-2">
@@ -162,6 +204,17 @@ export function ChatArea({
           )}
           <ThemeToggle />
         </div>
+
+        {/* Search bar */}
+        <MessageSearch
+          messages={messages}
+          isOpen={isSearchOpen}
+          onClose={() => {
+            setIsSearchOpen(false);
+            setSearchQuery('');
+          }}
+          onNavigateToResult={handleNavigateToResult}
+        />
       </header>
 
       {/* Messages */}
@@ -171,12 +224,15 @@ export function ChatArea({
         <ScrollArea ref={scrollRef} className="flex-1">
           <div className="max-w-4xl mx-auto py-4">
             {messages.map((message) => (
-              <ChatMessage
-                key={message.id}
-                role={message.role}
-                content={message.content}
-                createdAt={message.created_at}
-              />
+              <div key={message.id} id={`message-${message.id}`}>
+                <ChatMessage
+                  role={message.role}
+                  content={message.content}
+                  createdAt={message.created_at}
+                  onEdit={message.role === 'user' ? handleEditMessage(message.id) : undefined}
+                  highlightSearch={searchQuery}
+                />
+              </div>
             ))}
             <AnimatePresence>
               {isLoading && !streamingMessage && <TypingIndicator />}

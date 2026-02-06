@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Paperclip, Image, Mic, X } from 'lucide-react';
+import { Send, Paperclip, Image, X, Wand2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { PromptTemplates } from './PromptTemplates';
+import { VoiceInputButton } from './VoiceInputButton';
+import { MarkdownPreview } from './MarkdownPreview';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -13,6 +16,10 @@ interface ChatInputProps {
 export function ChatInput({ onSend, disabled, placeholder = "Skriv ett meddelande..." }: ChatInputProps) {
   const [message, setMessage] = useState('');
   const [attachments, setAttachments] = useState<string[]>([]);
+  const [messageHistory, setMessageHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea
@@ -26,9 +33,14 @@ export function ChatInput({ onSend, disabled, placeholder = "Skriv ett meddeland
 
   const handleSend = () => {
     if (message.trim() && !disabled) {
+      // Add to history
+      setMessageHistory(prev => [message.trim(), ...prev].slice(0, 50));
+      setHistoryIndex(-1);
+      
       onSend(message.trim());
       setMessage('');
       setAttachments([]);
+      setShowPreview(false);
     }
   };
 
@@ -37,10 +49,27 @@ export function ChatInput({ onSend, disabled, placeholder = "Skriv ett meddeland
       e.preventDefault();
       handleSend();
     }
+    
+    // Arrow up for message history
+    if (e.key === 'ArrowUp' && !message.trim()) {
+      e.preventDefault();
+      if (messageHistory.length > 0) {
+        const newIndex = historyIndex < messageHistory.length - 1 ? historyIndex + 1 : historyIndex;
+        setHistoryIndex(newIndex);
+        setMessage(messageHistory[newIndex] || '');
+      }
+    }
+    
+    // Arrow down to go forward in history
+    if (e.key === 'ArrowDown' && historyIndex >= 0) {
+      e.preventDefault();
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      setMessage(newIndex >= 0 ? messageHistory[newIndex] : '');
+    }
   };
 
   const handleAttachment = (type: 'file' | 'image') => {
-    // Visual only - simulate attachment
     const name = type === 'file' ? 'dokument.pdf' : 'bild.png';
     setAttachments(prev => [...prev, name]);
   };
@@ -49,11 +78,35 @@ export function ChatInput({ onSend, disabled, placeholder = "Skriv ett meddeland
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleTemplateSelect = (prompt: string) => {
+    setMessage(prompt);
+    textareaRef.current?.focus();
+  };
+
+  const handleVoiceTranscript = (text: string) => {
+    setMessage(prev => prev + text);
+  };
+
   const characterCount = message.length;
   const maxCharacters = 4000;
+  const hasMarkdown = /[*_#`\[\]>-]/.test(message);
 
   return (
-    <div className="p-4">
+    <div className="p-4 relative">
+      {/* Prompt templates popup */}
+      <PromptTemplates
+        isOpen={showTemplates}
+        onClose={() => setShowTemplates(false)}
+        onSelect={handleTemplateSelect}
+      />
+
+      {/* Markdown preview popup */}
+      <MarkdownPreview
+        content={message}
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+      />
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -87,6 +140,19 @@ export function ChatInput({ onSend, disabled, placeholder = "Skriv ett meddeland
               type="button"
               variant="ghost"
               size="icon"
+              className={cn(
+                "h-9 w-9 rounded-full hover:bg-muted",
+                showTemplates && "bg-primary/20"
+              )}
+              onClick={() => setShowTemplates(!showTemplates)}
+              title="Promptmallar"
+            >
+              <Wand2 className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
               className="h-9 w-9 rounded-full hover:bg-muted"
               onClick={() => handleAttachment('file')}
             >
@@ -101,14 +167,7 @@ export function ChatInput({ onSend, disabled, placeholder = "Skriv ett meddeland
             >
               <Image className="h-4 w-4" />
             </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-full hover:bg-muted"
-            >
-              <Mic className="h-4 w-4" />
-            </Button>
+            <VoiceInputButton onTranscript={handleVoiceTranscript} />
           </div>
 
           {/* Textarea */}
@@ -129,6 +188,27 @@ export function ChatInput({ onSend, disabled, placeholder = "Skriv ett meddeland
               )}
             />
           </div>
+
+          {/* Markdown preview toggle */}
+          {hasMarkdown && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-9 w-9 rounded-full hover:bg-muted",
+                showPreview && "bg-primary/20"
+              )}
+              onClick={() => setShowPreview(!showPreview)}
+              title="Förhandsvisning"
+            >
+              {showPreview ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </Button>
+          )}
 
           {/* Send button */}
           <motion.div
@@ -154,8 +234,11 @@ export function ChatInput({ onSend, disabled, placeholder = "Skriv ett meddeland
           </motion.div>
         </div>
 
-        {/* Character count */}
-        <div className="flex justify-end mt-2">
+        {/* Character count and history hint */}
+        <div className="flex justify-between items-center mt-2">
+          <span className="text-xs text-muted-foreground">
+            {messageHistory.length > 0 && "↑ för tidigare meddelanden"}
+          </span>
           <span className={cn(
             "text-xs",
             characterCount > maxCharacters * 0.9
