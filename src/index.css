@@ -160,50 +160,53 @@
   }
 
   .sunset {
-    --background: 20 30% 10%;
-    --foreground: 30 30% 95%;
+    /* Warm amber and terracotta - cozy and easy on eyes */
+    --background: 25 20% 12%;
+    --foreground: 30 18% 88%;
 
-    --card: 20 25% 14%;
-    --card-foreground: 30 30% 95%;
+    --card: 25 18% 15%;
+    --card-foreground: 30 18% 88%;
 
-    --popover: 20 25% 14%;
-    --popover-foreground: 30 30% 95%;
+    --popover: 25 18% 15%;
+    --popover-foreground: 30 18% 88%;
 
-    --primary: 25 95% 55%;
+    /* Soft amber primary */
+    --primary: 30 65% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 20 30% 18%;
-    --secondary-foreground: 25 90% 70%;
+    --secondary: 25 20% 18%;
+    --secondary-foreground: 30 55% 68%;
 
-    --muted: 20 25% 18%;
-    --muted-foreground: 30 20% 60%;
+    --muted: 25 16% 18%;
+    --muted-foreground: 30 12% 55%;
 
-    --accent: 340 85% 60%;
+    /* Warm terracotta accent */
+    --accent: 15 55% 55%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 55% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 20 25% 22%;
-    --input: 20 25% 22%;
-    --ring: 25 95% 55%;
+    --border: 25 18% 22%;
+    --input: 25 18% 22%;
+    --ring: 30 65% 50%;
 
-    --glass: 20 25% 14% / 0.8;
-    --glass-border: 25 60% 35% / 0.5;
-    --glass-shadow: 25 95% 45% / 0.15;
+    --glass: 25 18% 15% / 0.8;
+    --glass-border: 30 40% 32% / 0.5;
+    --glass-shadow: 30 65% 42% / 0.12;
 
-    --gradient-primary: linear-gradient(135deg, hsl(25 95% 55%), hsl(340 85% 60%));
-    --gradient-secondary: linear-gradient(135deg, hsl(40 90% 50%), hsl(25 95% 55%));
-    --gradient-background: linear-gradient(135deg, hsl(20 30% 8%), hsl(340 25% 12%), hsl(25 35% 10%));
+    --gradient-primary: linear-gradient(135deg, hsl(30 65% 50%), hsl(15 55% 55%));
+    --gradient-secondary: linear-gradient(135deg, hsl(40 60% 48%), hsl(30 65% 50%));
+    --gradient-background: linear-gradient(135deg, hsl(25 20% 10%), hsl(15 18% 13%), hsl(30 22% 11%));
 
-    --sidebar-background: 20 25% 12% / 0.8;
-    --sidebar-foreground: 30 30% 90%;
-    --sidebar-primary: 25 95% 55%;
+    --sidebar-background: 25 18% 13% / 0.8;
+    --sidebar-foreground: 30 15% 85%;
+    --sidebar-primary: 30 65% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 25 40% 22%;
-    --sidebar-accent-foreground: 25 90% 70%;
-    --sidebar-border: 20 25% 22%;
-    --sidebar-ring: 25 95% 55%;
+    --sidebar-accent: 30 30% 22%;
+    --sidebar-accent-foreground: 30 55% 68%;
+    --sidebar-border: 25 18% 22%;
+    --sidebar-ring: 30 65% 50%;
   }
 
   .forest {
